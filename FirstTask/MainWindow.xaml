@@ -4,9 +4,18 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:FirstTask"
-        mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
-    <Grid>
+        xmlns:col="clr-namespace:System.Collections;assembly=mscorlib"
+        xml:lang="ru"
         
+        mc:Ignorable="d"
+        Title="First task" Height="400" Width="640">
+    <Grid x:Name="MainRoot" Background="White">
+        <DataGrid x:Name="Table" AutoGenerateColumns="False" ItemsSource="{Binding ListCities}" Margin="0,10,0,160">
+            <DataGrid.Columns>
+                <DataGridTextColumn xml:lang="ru" Binding="{Binding Id}" FontSize="18" FontFamily="Times New Roman" Header="Id города"/>
+                <DataGridTextColumn xml:lang="ru" Binding="{Binding Name}" FontSize="18" FontFamily="Times New Roman" Header="Название города"/>
+                <DataGridTextColumn xml:lang="ru" Binding="{Binding Count}" FontSize="18" FontFamily="Times New Roman" Header="Количество улиц"/>
+            </DataGrid.Columns>
+        </DataGrid>
     </Grid>
 </Window>
