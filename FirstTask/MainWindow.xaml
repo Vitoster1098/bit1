@@ -10,12 +10,18 @@
         mc:Ignorable="d"
         Title="First task" Height="400" Width="640">
     <Grid x:Name="MainRoot" Background="White">
-        <DataGrid x:Name="Table" AutoGenerateColumns="True" Margin="0,10,0,160" MouseDoubleClick="Table_MouseDoubleClick" CanUserReorderColumns="False" CanUserAddRows="False" CanUserDeleteRows="False" IsReadOnly="True">
+        <DataGrid x:Name="Table" AutoGenerateColumns="True" Margin="0,20,0,150" MouseDoubleClick="Table_MouseDoubleClick" CanUserReorderColumns="False" CanUserAddRows="False" CanUserDeleteRows="False" IsReadOnly="True" ScrollViewer.CanContentScroll="True">
             <!--DataGrid.Columns>
                 <DataGridTextColumn xml:lang="ru" Binding="{Binding Id}" FontSize="18" FontFamily="Times New Roman" Header="Id города"/>
                 <DataGridTextColumn xml:lang="ru" Binding="{Binding Name}" FontSize="18" FontFamily="Times New Roman" Header="Название города"/>
                 <DataGridTextColumn xml:lang="ru" Binding="{Binding Count}" FontSize="18" FontFamily="Times New Roman" Header="Количество улиц"/>
             </DataGrid.Columns-->
         </DataGrid>
+        <Button x:Name="BackButton" Content="Назад" HorizontalAlignment="Left" VerticalAlignment="Top" Click="BackButton_Click" Height="20" Width="37"  Visibility="Hidden"/>
+        <Label x:Name="lbl1" Content="Площадь от" HorizontalAlignment="Left" Margin="37,0,0,0" VerticalAlignment="Top" Height="20" Width="68" FontSize="10" Padding="5,2,5,5"  Visibility="Hidden"/>
+        <TextBox x:Name="txtFrom" HorizontalAlignment="Left" Margin="105,0,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="95" Height="20"  Visibility="Hidden"/>
+        <Label x:Name="lbl2" Content="до" HorizontalAlignment="Left" Margin="200,0,0,0" VerticalAlignment="Top" Height="20" Width="35" FontSize="10" Padding="5,2,5,5" Visibility="Hidden"/>
+        <TextBox x:Name="txtTo" HorizontalAlignment="Left" Margin="235,0,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="95" Height="20" Visibility="Hidden"/>
+        <Button x:Name="diapason" Content="Отобрать" HorizontalAlignment="Left" Margin="335,0,0,0" VerticalAlignment="Top" Width="60" FontSize="10" Height="20" Visibility="Hidden" Click="diapason_Click"/>
     </Grid>
 </Window>

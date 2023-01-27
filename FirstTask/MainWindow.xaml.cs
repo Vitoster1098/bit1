@@ -1,22 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Data.SqlClient;
 using System.Data;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
-using MySql.Data;
 using MySql.Data.MySqlClient;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 using System.Data.Common;
 
 namespace FirstTask
@@ -30,6 +18,7 @@ namespace FirstTask
         public string DatabaseName { get; set; }
         public string UserName { get; set; }
         public string Password { get; set; }
+        public string Charset { get; set; }
 
         public MySqlConnection Connection { get; set; }
         private static DBConnection _instance = null;
@@ -44,7 +33,7 @@ namespace FirstTask
         {
             if (String.IsNullOrEmpty(DatabaseName))
                 return false;
-            string connstring = string.Format("Server={0}; database={1}; UID={2}; password={3}", Server, DatabaseName, UserName, Password);
+            string connstring = string.Format("Server={0}; database={1}; UID={2}; password={3}; charset={4};", Server, DatabaseName, UserName, Password, Charset);
             Connection = new MySqlConnection(connstring);
             try
             {
@@ -74,6 +63,8 @@ namespace FirstTask
         int level = 0; /* 0 - города, 1 - улицы, 2 - дома, 3 - квартиры */
         int id = 0; /* Id записи */
 
+        List<int> id_stack = new List<int>(); /* Симуляция стека для обращения к предыдущему уровню интерфейса по id */
+
         public MainWindow()
         {
             InitializeComponent();          
@@ -82,64 +73,9 @@ namespace FirstTask
             dbCon.DatabaseName = "wpf";
             dbCon.UserName = "root";
             dbCon.Password = "";
+            dbCon.Charset = "utf8";
 
             FillGrid(dbCon);
-        }
-
-        public class cities
-        {
-            public int Id { get; set; }
-            public string Name { get; set; }
-            public int Count { get; set; }
-
-            public cities(int Id, string Name, int Count)
-            {
-                this.Id = Id;
-                this.Name = Name;
-                this.Count = Count;
-            }
-        }
-
-        public class streets
-        {
-            public int Id { get; set; }
-            public string Name { get; set; }
-            public int Count { get; set; }
-
-            public streets(int Id, string Name, int Count)
-            {
-                this.Id = Id;
-                this.Name = Name;
-                this.Count = Count;
-            }
-        }
-
-        public class houses
-        {
-            public int Id { get; set; }
-            public string Number { get; set; }
-            public int Count { get; set; }
-
-            public houses(int Id, string Number, int Count)
-            {
-                this.Id = Id;
-                this.Number = Number;
-                this.Count = Count;
-            }
-        }
-
-        public class apartments
-        {
-            public int Id { get; set; }
-            public float area { get; set; }
-            public int houseId { get; set; }
-            
-            public apartments(int Id, float area, int houseId)
-            {
-                this.Id = Id;
-                this.area = area;
-                this.houseId = houseId;
-            }
         }
 
         /* Заполнить таблицу 1 уровня */
@@ -158,7 +94,7 @@ namespace FirstTask
         {
             string sql = "SELECT streets.id AS 'Id улицы', streets.name AS 'Название улицы', COUNT(houses.id) AS 'Количество домов' " +
                     "FROM streets, houses " +
-                    "WHERE streets.city_id = " + id + " AND houses.street_id = streets.id " +
+                    "WHERE streets.city_id = " + id_stack.Last() + " AND houses.street_id = streets.id " +
                     "GROUP BY streets.id;";
 
             ExecuteQuery(sql);
@@ -167,15 +103,27 @@ namespace FirstTask
         /* Заполнить таблицу 3 уровня */
         public void FillDrid3(DBConnection dbCon)
         {
+            string sql = "SELECT houses.id AS 'Id дома', houses.number AS 'Номер дома', COUNT(apartments.id) AS 'Количество квартир', " +
+                "SUM(apartments.area) AS 'Общая площадь квартир' " +
+                "FROM houses, apartments " +
+                "WHERE houses.id = apartments.house_id AND houses.id = " + id_stack.Last() + " " +
+                "GROUP BY houses.id";
 
+            ExecuteQuery(sql);
         }
 
         /* Заполнить таблицу 4 уровня */
         public void FillDrid4(DBConnection dbCon)
         {
+            string sql = "SELECT apartments.id AS 'Id квартиры', apartments.area AS 'Площадь квартиры' " +
+                "FROM apartments, houses " +
+                "WHERE apartments.area BETWEEN 0 AND 300 " +
+                "AND houses.id = apartments.house_id;";
 
+            ExecuteQuery(sql);
         }
 
+        /* Выполнение SQL-запроса и вывод данных в DataGrid */
         public void ExecuteQuery(string sql)
         {
             if (dbCon.IsConnect())
@@ -193,15 +141,10 @@ namespace FirstTask
             }
         }
 
-        /* Двойное нажатие по DataGrid для получения id строки */
-        private void Table_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+        /* Вызов отображения интерфейса в зависимости от уровня */
+        public void ExecuteOutputTable(int lvl)
         {
-            var row = Table.SelectedItem as DataRowView;
-            //MessageBox.Show(row.Row.ItemArray[0].ToString());
-            id = Convert.ToInt32(row.Row.ItemArray[0]);
-            level += 1;
-
-            switch (level) 
+            switch (lvl)
             {
                 case 0:
                     {
@@ -210,11 +153,11 @@ namespace FirstTask
                     }
                 case 1:
                     {
-                        FillDrid2(dbCon); 
+                        FillDrid2(dbCon);
                         break;
                     }
-                case 2: 
-                    { 
+                case 2:
+                    {
                         FillDrid3(dbCon);
                         break;
                     }
@@ -224,6 +167,88 @@ namespace FirstTask
                         break;
                     }
             }
+        }
+
+        /* Двойное нажатие по DataGrid для получения id строки */
+        private void Table_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+        {
+            var row = Table.SelectedItem as DataRowView;
+            //MessageBox.Show(row.Row.ItemArray[0].ToString());
+            id = Convert.ToInt32(row.Row.ItemArray[0]);
+            id_stack.Add(id);
+
+            level += 1;
+
+            if(level > 0)
+            {
+                BackButton.Visibility = Visibility.Visible;
+            }
+            if(level > 3)
+            {
+                level= 3;
+            }            
+            if(level == 3)
+            {
+                lbl1.Visibility= Visibility.Visible;
+                lbl2.Visibility= Visibility.Visible;
+                txtFrom.Visibility= Visibility.Visible;
+                txtTo.Visibility= Visibility.Visible;
+                diapason.Visibility= Visibility.Visible;
+            }            
+
+            ExecuteOutputTable(level);
+        }
+
+        /* Кнопка возврата интерфейса на уровень назад */
+        private void BackButton_Click(object sender, RoutedEventArgs e)
+        {
+            level -= 1;
+            id_stack.RemoveAt(id_stack.Count - 1);
+
+            if (level < 0)
+            {
+                level = 0;
+            }
+            if (level == 0)
+            {
+                BackButton.Visibility = Visibility.Hidden;
+            }
+            if (level < 3)
+            {
+                lbl1.Visibility = Visibility.Hidden;
+                lbl2.Visibility = Visibility.Hidden;
+                txtFrom.Visibility = Visibility.Hidden;
+                txtTo.Visibility = Visibility.Hidden;
+                diapason.Visibility= Visibility.Hidden;
+
+                txtFrom.Text= string.Empty;
+                txtTo.Text= string.Empty;
+            }
+
+            ExecuteOutputTable(level);
+        }
+
+        /* Кнопка отобрать квартиры согласно диапазону */
+        private void diapason_Click(object sender, RoutedEventArgs e)
+        {
+            double begin = 0, end = 1000000;
+            try
+            {
+                begin = Convert.ToDouble(txtFrom.Text);
+                end = Convert.ToDouble(txtTo.Text);
+            }
+            catch(Exception ex)
+            {
+                MessageBox.Show(ex.Message, "Ошибка");
+                return;
+            }
+
+            string sql = "SELECT apartments.id AS 'Id квартиры', apartments.area AS 'Площадь квартиры' " +
+                "FROM apartments, houses " +
+                "WHERE apartments.area BETWEEN " + Math.Floor(begin) + " AND " + Math.Floor(end) + " " +
+                "AND houses.id = apartments.house_id;";
+
+            ExecuteQuery(sql);
         }
     }
 }
