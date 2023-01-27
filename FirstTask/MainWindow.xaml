@@ -10,12 +10,12 @@
         mc:Ignorable="d"
         Title="First task" Height="400" Width="640">
     <Grid x:Name="MainRoot" Background="White">
-        <DataGrid x:Name="Table" AutoGenerateColumns="False" ItemsSource="{Binding ListCities}" Margin="0,10,0,160">
-            <DataGrid.Columns>
+        <DataGrid x:Name="Table" AutoGenerateColumns="True" Margin="0,10,0,160" MouseDoubleClick="Table_MouseDoubleClick" CanUserReorderColumns="False" CanUserAddRows="False" CanUserDeleteRows="False" IsReadOnly="True">
+            <!--DataGrid.Columns>
                 <DataGridTextColumn xml:lang="ru" Binding="{Binding Id}" FontSize="18" FontFamily="Times New Roman" Header="Id города"/>
                 <DataGridTextColumn xml:lang="ru" Binding="{Binding Name}" FontSize="18" FontFamily="Times New Roman" Header="Название города"/>
                 <DataGridTextColumn xml:lang="ru" Binding="{Binding Count}" FontSize="18" FontFamily="Times New Roman" Header="Количество улиц"/>
-            </DataGrid.Columns>
+            </DataGrid.Columns-->
         </DataGrid>
     </Grid>
 </Window>

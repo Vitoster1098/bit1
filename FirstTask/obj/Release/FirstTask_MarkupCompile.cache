@@ -4,11 +4,11 @@
 winexe
 C#
 .cs
-C:\Projects\C#\bit1\FirstTask\obj\Debug\
+C:\Projects\C#\bit1\FirstTask\obj\Release\
 FirstTask
 none
 false
-DEBUG;TRACE
+TRACE
 C:\Projects\C#\bit1\FirstTask\App.xaml
 1219584333
 
@@ -16,5 +16,5 @@ C:\Projects\C#\bit1\FirstTask\App.xaml
 15512639796
 MainWindow.xaml;
 
-False
+True
 
