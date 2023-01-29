@@ -243,6 +243,12 @@ namespace FirstTask
                 return;
             }
 
+            if(end < begin)
+            {
+                MessageBox.Show("Конец диапазона не может быть меньше начала", "Ошибка");
+                return;
+            }
+
             string sql = "SELECT apartments.id AS 'Id квартиры', apartments.area AS 'Площадь квартиры' " +
                 "FROM apartments, houses " +
                 "WHERE apartments.area BETWEEN " + Math.Floor(begin) + " AND " + Math.Floor(end) + " " +
